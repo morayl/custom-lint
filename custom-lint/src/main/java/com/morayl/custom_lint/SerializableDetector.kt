@@ -18,9 +18,9 @@ package com.morayl.custom_lint
 import com.android.tools.lint.client.api.UElementHandler
 import com.android.tools.lint.detector.api.*
 import com.android.tools.lint.detector.api.Detector.UastScanner
-import org.jetbrains.kotlin.asJava.elements.KtLightField
-import org.jetbrains.uast.*
-import org.jetbrains.uast.kotlin.KotlinUClass
+import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UField
+import org.jetbrains.uast.getContainingUClass
 import org.jetbrains.uast.kotlin.KotlinUField
 
 /**
@@ -30,7 +30,7 @@ import org.jetbrains.uast.kotlin.KotlinUField
 @Suppress("UnstableApiUsage")
 class SerializableDetector : Detector(), UastScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement?>> {
-        return listOf(UField::class.java, UParameter::class.java)
+        return listOf(UField::class.java)
     }
 
     override fun createUastHandler(context: JavaContext): UElementHandler {
@@ -43,73 +43,29 @@ class SerializableDetector : Detector(), UastScanner {
         // Also be aware of context.getJavaEvaluator() which provides a lot of
         // utility functionality.
         return object : UElementHandler() {
-
-            override fun visitParameter(node: UParameter) {
-                print(node.text)
-            }
             override fun visitField(node: UField) {
-                if (node !is KotlinUField) return
-                val isSerializable = node.getContainingUClass()?.uAnnotations?.find { it.qualifiedName == "kotlinx.serialization.Serializable" } != null
-                println(node.getContainingUClass()?.uAnnotations?.getOrNull(0)?.qualifiedName)
-                println(node.text)
+                if (node !is KotlinUField) {
+                    return
+                }
+                val isSerializable =
+                    node.getContainingUClass()?.uAnnotations?.find { it.qualifiedName == "kotlinx.serialization.Serializable" } != null
+//                println(node.getContainingUClass()?.uAnnotations?.getOrNull(0)?.qualifiedName)
+//                println(node.text)
                 if (!isSerializable) {
                     return
                 }
-                println(node.uAnnotations.getOrNull(0)?.qualifiedName) // org.jetbrains.annotations.Nullable
+//                println(node.uAnnotations.getOrNull(0)?.qualifiedName) // org.jetbrains.annotations.Nullable
                 val isNullable = node.text.matches(Regex("va[lr]\\s+.*:\\s*\\w+\\?.*"))
-                println(node.name + ":" + isNullable)
+//                println(node.name + ":" + isNullable)
                 if (isNullable) {
                     val isInitialized = node.text.matches(Regex("va[lr]\\s+.*:\\s*\\w+\\?[\\\\n\\s]*=.*"))
-                    println(node.name + ":" + isInitialized)
+//                    println(node.name + ":" + isInitialized)
                     if (!isInitialized) {
                         context.report(
                             ISSUE, node, context.getNameLocation(node),
-                            "Should initialize nullable parameter in Kotlinx Serializable Class"
+                            "Should initialize nullable parameter in Kotlinx Serializable Class. Please add '= null' statement."
                         )
                     }
-                }
-            }
-            override fun visitClass(node: UClass) {
-                if (node !is KotlinUClass) return
-                val isSerializable = node.uAnnotations.find { it.qualifiedName == "kotlinx.serialization.Serializable" } != null
-                println(node.uAnnotations.getOrNull(0)?.qualifiedName)
-                if (!isSerializable) {
-                    return
-                }
-
-                val fields = node
-                    .allFields
-                    .filterIsInstance<KtLightField>()
-
-                checkFields(node, fields)
-            }
-
-            private fun checkFields(node: KotlinUClass, fields: List<KtLightField>) {
-                fields.forEach {
-                    val isNullable = it.text.matches(Regex("va[lr]\\s+.*:\\s*\\w+\\?.*"))
-                    println(it.name + ":" + isNullable)
-                    if (isNullable) {
-                        val isInitialized = it.text.matches(Regex("va[lr]\\s+.*:\\s*\\w+\\?[\\\\n\\s]*=.*"))
-                        println(it.name + ":" + isInitialized)
-                        if (!isInitialized) {
-                            context.report(
-                                ISSUE, node, context.getNameLocation(node),
-                                "Should initialize nullable constructor argument parameter in Kotlinx Serializable Class"
-                            )
-                        }
-                    }
-                }
-                println(fields)
-            }
-
-            override fun visitLiteralExpression(node: ULiteralExpression) {
-                val psi = node.sourcePsi
-                val string = node.evaluateString() ?: return
-                if (string.contains("lint") && string.matches(Regex(".*\\blint\\b.*"))) {
-                    context.report(
-                        ISSUE, node, context.getLocation(node),
-                        "This code mentions `lint`: **Congratulations**"
-                    )
                 }
             }
         }
@@ -126,15 +82,13 @@ class SerializableDetector : Detector(), UastScanner {
             id = "SerializableNullableFieldInitialize",
             // Title -- shown in the IDE's preference dialog, as category headers in the
             // Analysis results window, etc
-            briefDescription = "Lint Mentions",
+            briefDescription = "Serializable nullable field initializes",
             // Full explanation of the issue; you can use some markdown markup such as
             // `monospace`, *italic*, and **bold**.
             explanation = """
-                    This check highlights string literals in code which mentions the word `lint`. \
-                    Blah blah blah.
-
-                    Another paragraph here.
-                    """, // no need to .trimIndent(), lint does that automatically
+                This check highlights fields in code which nullable and not initialized and 
+                when its containing class has annotation "@kotlinx.serialization.Serializable".
+                """.trimIndent(), // no need to .trimIndent(), lint does that automatically
             category = Category.CORRECTNESS,
             priority = 6,
             severity = Severity.WARNING,
