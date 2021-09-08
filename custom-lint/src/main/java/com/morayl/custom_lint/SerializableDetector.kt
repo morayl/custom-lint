@@ -1,18 +1,3 @@
-/*
- * Copyright (C) 2020 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.morayl.custom_lint
 
 import com.android.tools.lint.client.api.UElementHandler
@@ -23,10 +8,6 @@ import org.jetbrains.uast.UField
 import org.jetbrains.uast.getContainingUClass
 import org.jetbrains.uast.kotlin.KotlinUField
 
-/**
- * Sample detector showing how to analyze Kotlin/Java code. This example
- * flags all string literals in the code that contain the word "lint".
- */
 @Suppress("UnstableApiUsage")
 class SerializableDetector : Detector(), UastScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement?>> {
