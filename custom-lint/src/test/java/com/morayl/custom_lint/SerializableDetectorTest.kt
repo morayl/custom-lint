@@ -52,29 +52,4 @@ class SerializableDetectorTest {
             )
     }
 
-//    @Test
-//    fun testBasic() {
-//        lint().allowMissingSdk().files(
-//            kotlin(
-//                """
-//                    package test.pkg;
-//                    class TestClass1 {
-//                        // In a comment, mentioning "lint" has no effect
-//                        private const val s1 : String = "Ignore non-word usages: linting"
-//                        private const val s2 : String = "Let's say it: lint"
-//                    }
-//                    """
-//            ).indented()
-//        )
-//            .issues(SampleCodeDetector.ISSUE)
-//            .run()
-//            .expect(
-//                """
-//                    src/test/pkg/TestClass1.kt:5: Warning: This code mentions lint: Congratulations [ShortUniqueId]
-//                        private const val s2 : String = "Let's say it: lint"
-//                                                         ~~~~~~~~~~~~~~~~~~
-//                    0 errors, 1 warnings
-//                    """
-//            )
-//    }
 }
