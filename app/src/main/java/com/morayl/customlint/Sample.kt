@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Sample(
     val a: String,
-    val b: String?
+    val b: String?,
+    val c: List<String>?,
 )
