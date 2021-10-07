@@ -36,6 +36,8 @@ class SerializableDetectorTest {
                         val s2: String?,
                         val s4: String
                         = "aaa",
+                        @DrawableRes
+                        val s5: Int?,
                     )
                     """
             ).indented()

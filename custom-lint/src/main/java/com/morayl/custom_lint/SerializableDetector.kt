@@ -36,10 +36,10 @@ class SerializableDetector : Detector(), UastScanner {
                     return
                 }
 //                println(node.uAnnotations.getOrNull(0)?.qualifiedName) // org.jetbrains.annotations.Nullable
-                val isNullable = node.text.matches(Regex("va[lr]\\s+.*:\\s*.+\\?.*"))
+                val isNullable = node.text.matches(Regex("[\\s\\S]*va[lr]\\s+.*:\\s*.+\\?.*"))
 //                println(node.name + ":" + isNullable)
                 if (isNullable) {
-                    val isInitialized = node.text.matches(Regex("va[lr]\\s+.*:\\s*.+\\?[\\\\n\\s]*=.*"))
+                    val isInitialized = node.text.matches(Regex("[\\s\\S]*va[lr]\\s+.*:\\s*.+\\?[\\\\n\\s]*=.*"))
 //                    println(node.name + ":" + isInitialized)
                     if (!isInitialized) {
                         context.report(
